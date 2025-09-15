@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Drug Search</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f9fafb;
+        padding: 20px;
+      }
+      .container {
+        max-width: 600px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+        margin-top: 20px;
+      }
+      li {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+        background: #fafafa;
+      }
+      li h2 {
+        margin: 0;
+        font-size: 1.1rem;
+      }
+      li p {
+        margin: 5px 0;
+        font-size: 0.9rem;
+        color: #444;
+      }
+      .price {
+        font-weight: bold;
+        color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Drug Search</h1>
+
+      <input type="text" id="search" placeholder="Search by drug name" />
+
+      <select id="category">
+        <option value="">All Categories</option>
+        <option value="Antibiotic">Move Free Ultra X75</option>
+        <option value="Painkiller">vitanim c</option>
+        <option value="Vitamin">paracetamol</option>
+      </select>
+
+      <ul id="drugList"></ul>
+    </div>
+
+    <script>
+      const searchInput = document.getElementById("search");
+      const categorySelect = document.getElementById("category");
+      const drugList = document.getElementById("drugList");
+
+      async function fetchDrugs() {
+        const search = searchInput.value;
+        const category = categorySelect.value;
+
+        try {
+          const res = await fetch(
+            `http://localhost:5888/api/v1/drugs?search=${encodeURIComponent(
+              search
+            )}&category=${encodeURIComponent(category)}`
+          );
+          const data = await res.json();
+
+          renderDrugs(data.data || []);
+        } catch (err) {
+          console.error("Error fetching drugs:", err);
+          drugList.innerHTML = "<li>Error loading drugs</li>";
+        }
+      }
+
+      function renderDrugs(drugs) {
+        drugList.innerHTML = "";
+        if (drugs.length === 0) {
+          drugList.innerHTML = "<li>No drugs found</li>";
+          return;
+        }
+
+        drugs.forEach((drug) => {
+          const li = document.createElement("li");
+          li.innerHTML = `
+          <h2>${drug.name}</h2>
+          <p>${drug.category}</p>
+          <p>${drug.description}</p>
+          <p class="price">$${drug.price}</p>
+        `;
+          drugList.appendChild(li);
+        });
+      }
+
+      searchInput.addEventListener("input", fetchDrugs);
+      categorySelect.addEventListener("change", fetchDrugs);
+
+      // Initial fetch
+      fetchDrugs();
+    </script>
+  </body>
+</html>
